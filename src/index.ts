@@ -1,14 +1,28 @@
-import dotenv from "dotenv";
-import { Bot } from "grammy";
-
-import { MyContext } from "./context.js";
-
-dotenv.config();
-
-const bot = new Bot<MyContext>(process.env.BOT_TOKEN);
+import bot from "./bot.js";
+import prisma from "./prisma.js";
 
 const pm = bot.chatType("private");
 
-pm.on("message", (ctx) => ctx.reply("hello world"));
+pm.command("register", (ctx) => ctx.conversation.enter("register"));
+pm.command("profile", async (ctx) => {
+  const user = await prisma.user.findUnique({ where: { tgId: ctx.from.id } });
+  if (!user) {
+    await ctx.reply("You are not registered!");
+    return;
+  }
+  await ctx.replyWithMediaGroup(
+    user.photos.map((id, index) => ({
+      media: id,
+      type: "photo",
+      caption:
+        index !== 0
+          ? ""
+          : `
+${user.name}, ${user.age} - ${user.city}
+${user.bio}
+`,
+    }))
+  );
+});
 
 bot.start();
