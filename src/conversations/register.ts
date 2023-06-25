@@ -6,70 +6,97 @@ import prisma from "../prisma.js";
 
 type MyConversation = Conversation<MyContext>;
 
-const getCity = async (location: string | Location) => "Polotsk";
+// WARNING: Incorrect api parsing for getting city
+const getCity = async (location: string | Location): Promise<string | null> => {
+  const url = "https://geocode-maps.yandex.ru/1.x/?";
+  const params = new URLSearchParams({
+    apikey: process.env.MAPS_API_KEY,
+    format: "json",
+    geocode:
+      typeof location === "string"
+        ? location
+        : `${location.longitude},${location.latitude}`,
+  });
+  try {
+    const data = await (await fetch(url + params)).json();
+    const city =
+      data?.response?.GeoObjectCollection?.featureMember?.[3]?.GeoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components?.find(
+        (v: { name: string; kind: string }) => v.kind === "locality"
+      )?.name;
+    console.log(
+      data?.response?.GeoObjectCollection?.featureMember?.[3]?.GeoObject
+        ?.metaDataProperty?.GeocoderMetaData?.Address?.Components
+    );
+    return city || null;
+  } catch {
+    return null;
+  }
+};
 
 export const register = async (
   conversation: MyConversation,
   ctx: MyContext
 ) => {
-  const userInfo = {
-    name: "",
-    age: 0,
-    city: "",
-    bio: "",
-    isFemale: false,
-    photos: [],
-  };
+  let name: string;
+  let age: number;
+  let city: string;
+  let bio: string;
+  let isFemale: boolean;
+  let photos: string[] = [];
   await ctx.reply("Enter your name", {
-    reply_markup: new Keyboard().text(ctx.from.first_name ?? "SomeName"),
+    reply_markup: new Keyboard()
+      .text(ctx.from.first_name ?? "SomeName")
+      .resized(),
   });
   while (true) {
-    userInfo.name = await conversation.form.text();
-    if (userInfo.name.length < 30) break;
+    name = await conversation.form.text();
+    if (name.length < 30) break;
     await ctx.reply("This name is too long!");
   }
-  await ctx.reply("Enter your age");
+  await ctx.reply("Enter your age", {
+    reply_markup: { remove_keyboard: true },
+  });
   while (true) {
-    userInfo.age = await conversation.form.int();
-    if (userInfo.age > 15 && userInfo.age < 100) break;
+    age = await conversation.form.int();
+    if (age > 15 && age < 100) break;
     await ctx.reply("Incorrect age!");
   }
   await ctx.reply("Enter your city", {
-    reply_markup: new Keyboard().requestLocation("Send my location"),
+    reply_markup: new Keyboard().requestLocation("Send my location").resized(),
   });
   while (true) {
     const coordsCtx = await conversation.waitFor([":location", ":text"]);
-    userInfo.city = await getCity(coordsCtx.msg.location ?? coordsCtx.msg.text);
-    if (userInfo.city) break;
+    city = await getCity(coordsCtx.msg.location ?? coordsCtx.msg.text);
+    if (city) break;
     await ctx.reply("Incorrect city!");
   }
-  await ctx.reply("Write something about you");
+  await ctx.reply("Write something about you", {
+    reply_markup: { remove_keyboard: true },
+  });
   while (true) {
-    userInfo.bio = await conversation.form.text();
-    if (userInfo.bio.length < 70) break;
+    bio = await conversation.form.text();
+    if (bio.length < 70) break;
     await ctx.reply("Text is too long");
   }
   await ctx.reply("Enter your gender", {
-    reply_markup: new Keyboard().text("Male").text("Female"),
+    reply_markup: new Keyboard().text("Male").text("Female").resized(),
   });
   while (true) {
     const gender = await conversation.form.text();
-    if (gender === "Male") {
-      userInfo.isFemale = false;
-      break;
-    }
-    if (gender === "Female") {
-      userInfo.isFemale = true;
+    if (gender === "Male" || gender === "Female") {
+      isFemale = gender === "Female";
       break;
     }
     await ctx.reply("Choose one!");
   }
-  await ctx.reply("Send your photos");
+  await ctx.reply("Send your photos", {
+    reply_markup: { remove_keyboard: true },
+  });
   photoLoop: while (true) {
     const photosCtx = await conversation.waitFor(":photo");
-    userInfo.photos = [...userInfo.photos, photosCtx.msg.photo[0].file_id];
+    photos = [...photos, photosCtx.msg.photo[0].file_id];
     await ctx.reply("Wanna add one more photo?", {
-      reply_markup: new Keyboard().text("Yes").text("No").oneTime(),
+      reply_markup: new Keyboard().text("Yes").text("No").oneTime().resized(),
     });
     while (true) {
       const addMore = await conversation.form.text();
@@ -83,14 +110,14 @@ export const register = async (
   }
   try {
     await prisma.user.create({
-      data: { tgId: ctx.from.id, ...userInfo },
+      data: { tgId: ctx.from.id, name, age, bio, city, photos, isFemale },
     });
   } catch {
     await prisma.user.update({
       where: {
         tgId: ctx.from.id,
       },
-      data: userInfo,
+      data: { name, age, bio, city, photos, isFemale },
     });
   }
   await ctx.reply("Successful registration!");
