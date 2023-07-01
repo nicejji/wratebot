@@ -6,60 +6,6 @@ import { sendProfile } from "../helpers.js";
 
 type MyConversation = Conversation<MyContext>;
 
-const recieveName = async (ctx: MyContext, conv: MyConversation) => {
-  const keyboard = new Keyboard().resized();
-  const prevName = ctx?.profile?.name;
-  const tgName = ctx?.from?.first_name;
-  if (prevName) keyboard.text(prevName);
-  if (tgName) keyboard.text(tgName);
-  await ctx.reply("Введите ваше имя 👤", {
-    reply_markup: tgName || prevName ? keyboard : { remove_keyboard: true },
-  });
-  while (true) {
-    const name = await conv.form.text();
-    if (name.length < 30) return name;
-    await ctx.reply("⚠️ Имя должно быть короче 30 символов!");
-  }
-};
-
-const recieveAge = async (ctx: MyContext, conv: MyConversation) => {
-  const prevAge = ctx?.profile?.age;
-  await ctx.reply("Введите ваш возраст 🔢", {
-    reply_markup: prevAge
-      ? new Keyboard().resized().text(`${prevAge}`)
-      : { remove_keyboard: true },
-  });
-  while (true) {
-    const age = await conv.form.int();
-    if (age > 15 && age < 100) return age;
-    await ctx.reply("⚠️ Возраст слишком мал или велик!");
-  }
-};
-
-const recieveCity = async (ctx: MyContext, conv: MyConversation) => {
-  const keyboard = new Keyboard().text("Полоцк").text("Новополоцк").resized();
-  await ctx.reply("Выберите свой город 🏙️", { reply_markup: keyboard });
-  while (true) {
-    const city = await conv.form.text();
-    if (city === "Полоцк" || city === "Новополоцк") return city;
-    await ctx.reply("⚠️ Выбери город из предложенных!");
-  }
-};
-
-const recieveBio = async (ctx: MyContext, conv: MyConversation) => {
-  const keyboard = new Keyboard().text("Оставить текущее").resized();
-  const prevBio = ctx?.profile?.bio;
-  await ctx.reply("Расскажи что-нибудь о себе 📝", {
-    reply_markup: prevBio ? keyboard : { remove_keyboard: true },
-  });
-  while (true) {
-    const bio = await conv.form.text();
-    if (bio === "Оставить текущее" && prevBio) return prevBio;
-    if (bio.length < 70) return bio;
-    await ctx.reply("⚠️ Описание должно быть короче 70 символов.");
-  }
-};
-
 const recieveIsFemale = async (ctx: MyContext, conv: MyConversation) => {
   const keyboard = new Keyboard()
     .text("Мужской 🙋‍♂️")
@@ -74,33 +20,37 @@ const recieveIsFemale = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recievePhotos = async (ctx: MyContext, conv: MyConversation) => {
-  const photos: string[] = [];
+const recievePhoto = async (ctx: MyContext, conv: MyConversation) => {
   const keyboard = new Keyboard().resized().text("Оставить текущее").oneTime();
-  const prevPhotos = ctx?.profile?.photos;
+  const prevPhoto = ctx?.profile?.photo;
   await ctx.reply("Отправь свое фото 📷", {
-    reply_markup: prevPhotos ? keyboard : { remove_keyboard: true },
+    reply_markup: prevPhoto ? keyboard : { remove_keyboard: true },
   });
   while (true) {
     const photosCtx = await conv.waitFor([":photo", ":text"]);
     const text = photosCtx?.msg?.text;
     const photo = photosCtx?.msg?.photo;
-    if (text === "Оставить текущее" && prevPhotos) return prevPhotos;
-    if (photos.length && text === "Это все, сохранить ✅") return photos;
-    if (!photo) {
-      await ctx.reply("Отправь фото!");
-      continue;
-    }
-    photos.push(photo[0].file_id);
-    if (photos.length > 2) return photos;
-    const keyboard = new Keyboard()
-      .text("Это все, сохранить ✅")
-      .oneTime()
-      .resized();
-    if (prevPhotos) keyboard.text("Оставить текущее");
-    await ctx.reply(`✅ Фото добавлено ${photos.length}/3`, {
-      reply_markup: keyboard,
-    });
+    if (text === "Оставить текущее" && prevPhoto) return prevPhoto;
+    if (photo) return photo[0].file_id;
+    if (!photo) await ctx.reply("Отправь фото!");
+  }
+};
+
+const recieveConfirm = async (ctx: MyContext, conv: MyConversation) => {
+  if (!ctx.profile) return true;
+  const keyboard = new Keyboard()
+    .resized()
+    .oneTime()
+    .text("Да")
+    .text("Оставить прошлую анкету");
+  await ctx.reply("Ваши оценки будут обнулены, вы хотите продолжить?", {
+    reply_markup: keyboard,
+  });
+  while (true) {
+    const confirm = await conv.form.text();
+    if (confirm === "Да" || confirm === "Оставить прошлую анкету")
+      return confirm === "Да";
+    await ctx.reply("⚠️ Нет такой опции!");
   }
 };
 
@@ -108,14 +58,14 @@ export const register = async (
   conversation: MyConversation,
   ctx: MyContext
 ) => {
+  const confirm = await recieveConfirm(ctx, conversation);
+  if (!confirm) return;
+  await prisma.grade.deleteMany({
+    where: { toId: ctx.from.id },
+  });
   const userData = {
-    name: await recieveName(ctx, conversation),
-    username: ctx?.from?.username ?? "",
-    age: await recieveAge(ctx, conversation),
-    city: await recieveCity(ctx, conversation),
-    bio: await recieveBio(ctx, conversation),
     isFemale: await recieveIsFemale(ctx, conversation),
-    photos: await recievePhotos(ctx, conversation),
+    photo: await recievePhoto(ctx, conversation),
   };
   const profile = await prisma.user.upsert({
     where: { tgId: ctx.from.id },

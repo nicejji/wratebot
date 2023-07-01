@@ -16,26 +16,21 @@ model Session {
 
 model User {
   tgId           BigInt   @id
-  username       String
-  name           String
-  age            Int
-  city           String
-  bio            String
   isFemale       Boolean
-  photos         String[]
+  photo          String
   created        DateTime @default(now())
   sentGrades     Grade[]  @relation("sentGrades")
   recievedGrades Grade[]  @relation("recievedGrades")
 }
 
 model Grade {
-  fromId  BigInt
-  toId    BigInt
-  isLike  Boolean
-  isMatch Boolean?
-  created DateTime @default(now())
-  from    User     @relation("sentGrades", fields: [fromId], references: [tgId])
-  to      User     @relation("recievedGrades", fields: [toId], references: [tgId])
+  fromId   BigInt
+  toId     BigInt
+  points   Int
+  isViewed Boolean  @default(false)
+  created  DateTime @default(now())
+  from     User     @relation("sentGrades", fields: [fromId], references: [tgId])
+  to       User     @relation("recievedGrades", fields: [toId], references: [tgId])
 
   @@id([fromId, toId])
   @@map("Like")

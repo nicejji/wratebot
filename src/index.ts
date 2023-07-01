@@ -1,11 +1,11 @@
 import bot from "./bot.js";
-import { sendProfile } from "./helpers.js";
+import { sendLikes, sendProfile } from "./helpers.js";
 
 await bot.api.setMyCommands([
-  { command: "search", description: "🔎 Поиск пользователей" },
-  { command: "likes", description: "❤️ Полученные лайки" },
+  { command: "search", description: "🔎 Оценивать пользователей" },
+  { command: "likes", description: "❤️ Полученные оценки" },
   { command: "profile", description: "👤 Мой профиль" },
-  { command: "edit", description: "✏️ Редактировать профиль" },
+  { command: "edit", description: "✏️ Заполнить профиль снова" },
 ]);
 
 const pm = bot.chatType("private");
@@ -31,7 +31,7 @@ pm.command("search", async (ctx) => {
 });
 
 pm.command("likes", async (ctx) => {
-  await ctx.conversation.enter("likes");
+  await sendLikes(ctx);
 });
 
 bot.start();
