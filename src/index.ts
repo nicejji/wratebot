@@ -12,9 +12,9 @@ const pm = bot.chatType("private");
 
 pm.command("start", async (ctx) => {
   if (ctx.profile) {
-    ctx.reply("Добро пожаловать снова!");
+    ctx.reply("Добро пожаловать снова! 😉");
   } else {
-    ctx.reply("Давайте создадим ваш профиль");
+    ctx.reply("Давайте создадим ваш профиль 📝");
     await ctx.conversation.enter("register");
   }
 });
