@@ -39,17 +39,12 @@ export const likes = async (conversation: MyConversation, ctx: MyContext) => {
       data: { isMatch },
     });
     if (grade.isMatch) {
-      await ctx.reply(
-        `Отлично\! Переходите общаться [${profile.name}](tg://user?id=${profile.tgId})`,
-        {
-          parse_mode: "MarkdownV2",
-        }
-      );
+      await ctx.reply(`Отлично, переходите общаться @${profile.username}`);
       await sendProfile(ctx, ctx.profile, Number(profile.tgId));
-      await ctx.api.sendMessage(
-        Number(profile.tgId),
-        `Есть взаимная симпатия, переходите общаться [${ctx.profile.name}](tg://user?id=${ctx.profile.tgId})`
-      );
+      await ctx.api.sendMessage( Number(profile.tgId), `Есть взаимная симпатия, переходите общаться @${ctx.profile.username}`);
     }
   }
+  await ctx.reply("✅ Все лайки просмотрены!", {
+    reply_markup: { remove_keyboard: true },
+  });
 };

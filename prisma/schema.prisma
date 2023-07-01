@@ -16,6 +16,7 @@ model Session {
 
 model User {
   tgId           BigInt   @id
+  username       String
   name           String
   age            Int
   city           String

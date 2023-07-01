@@ -110,6 +110,7 @@ export const register = async (
 ) => {
   const userData = {
     name: await recieveName(ctx, conversation),
+    username: ctx?.from?.username ?? "",
     age: await recieveAge(ctx, conversation),
     city: await recieveCity(ctx, conversation),
     bio: await recieveBio(ctx, conversation),
