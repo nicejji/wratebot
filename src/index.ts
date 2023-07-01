@@ -1,28 +1,37 @@
 import bot from "./bot.js";
-import prisma from "./prisma.js";
+import { sendProfile } from "./helpers.js";
+
+await bot.api.setMyCommands([
+  { command: "search", description: "🔎 Поиск пользователей" },
+  { command: "likes", description: "❤️ Полученные лайки" },
+  { command: "profile", description: "👤 Мой профиль" },
+  { command: "edit", description: "✏️ Редактировать профиль" },
+]);
 
 const pm = bot.chatType("private");
 
-pm.command("register", (ctx) => ctx.conversation.enter("register"));
-pm.command("profile", async (ctx) => {
-  const user = await prisma.user.findUnique({ where: { tgId: ctx.from.id } });
-  if (!user) {
-    await ctx.reply("You are not registered!");
-    return;
+pm.command("start", async (ctx) => {
+  if (ctx.profile) {
+    ctx.reply("Добро пожаловать снова!");
+  } else {
+    ctx.reply("Давайте создадим ваш профиль");
+    await ctx.conversation.enter("register");
   }
-  await ctx.replyWithMediaGroup(
-    user.photos.map((id, index) => ({
-      media: id,
-      type: "photo",
-      caption:
-        index !== 0
-          ? ""
-          : `
-${user.name}, ${user.age} - ${user.city}
-${user.bio}
-`,
-    }))
-  );
+});
+
+pm.command("edit", async (ctx) => {
+  await ctx.conversation.enter("register");
+});
+pm.command("profile", async (ctx) => {
+  await ctx.reply("👤 Так выглядит ваш профиль:");
+  await sendProfile(ctx, ctx.profile);
+});
+pm.command("search", async (ctx) => {
+  await ctx.conversation.enter("search");
+});
+
+pm.command("likes", async (ctx) => {
+  await ctx.conversation.enter("likes");
 });
 
 bot.start();

@@ -1,35 +1,106 @@
 import { Conversation } from "@grammyjs/conversations";
 import { MyContext } from "../context.js";
-import { Location } from "grammy/types";
 import { Keyboard } from "grammy";
 import prisma from "../prisma.js";
+import { sendProfile } from "../helpers.js";
 
 type MyConversation = Conversation<MyContext>;
 
-// WARNING: Incorrect api parsing for getting city
-const getCity = async (location: string | Location): Promise<string | null> => {
-  const url = "https://geocode-maps.yandex.ru/1.x/?";
-  const params = new URLSearchParams({
-    apikey: process.env.MAPS_API_KEY,
-    format: "json",
-    geocode:
-      typeof location === "string"
-        ? location
-        : `${location.longitude},${location.latitude}`,
+const recieveName = async (ctx: MyContext, conv: MyConversation) => {
+  const keyboard = new Keyboard().resized();
+  const prevName = ctx?.profile?.name;
+  const tgName = ctx?.from?.first_name;
+  if (prevName) keyboard.text(prevName);
+  if (tgName) keyboard.text(tgName);
+  await ctx.reply("Введите ваше имя 👤", {
+    reply_markup: tgName || prevName ? keyboard : { remove_keyboard: true },
   });
-  try {
-    const data = await (await fetch(url + params)).json();
-    const city =
-      data?.response?.GeoObjectCollection?.featureMember?.[3]?.GeoObject?.metaDataProperty?.GeocoderMetaData?.Address?.Components?.find(
-        (v: { name: string; kind: string }) => v.kind === "locality"
-      )?.name;
-    console.log(
-      data?.response?.GeoObjectCollection?.featureMember?.[3]?.GeoObject
-        ?.metaDataProperty?.GeocoderMetaData?.Address?.Components
-    );
-    return city || null;
-  } catch {
-    return null;
+  while (true) {
+    const name = await conv.form.text();
+    if (name.length < 30) return name;
+    await ctx.reply("⚠️ Имя должно быть короче 30 символов!");
+  }
+};
+
+const recieveAge = async (ctx: MyContext, conv: MyConversation) => {
+  const prevAge = ctx?.profile?.age;
+  await ctx.reply("Введите ваш возраст 🔢", {
+    reply_markup: prevAge
+      ? new Keyboard().resized().text(`${prevAge}`)
+      : { remove_keyboard: true },
+  });
+  while (true) {
+    const age = await conv.form.int();
+    if (age > 15 && age < 100) return age;
+    await ctx.reply("⚠️ Возраст слишком мал или велик!");
+  }
+};
+
+const recieveCity = async (ctx: MyContext, conv: MyConversation) => {
+  const keyboard = new Keyboard().text("Полоцк").text("Новополоцк").resized();
+  await ctx.reply("Выберите свой город 🏙️", { reply_markup: keyboard });
+  while (true) {
+    const city = await conv.form.text();
+    if (city === "Полоцк" || city === "Новополоцк") return city;
+    await ctx.reply("⚠️ Выбери город из предложенных!");
+  }
+};
+
+const recieveBio = async (ctx: MyContext, conv: MyConversation) => {
+  const keyboard = new Keyboard().text("Оставить текущее").resized();
+  const prevBio = ctx?.profile?.bio;
+  await ctx.reply("Расскажи что-нибудь о себе 📝", {
+    reply_markup: prevBio ? keyboard : { remove_keyboard: true },
+  });
+  while (true) {
+    const bio = await conv.form.text();
+    if (bio === "Оставить текущее" && prevBio) return prevBio;
+    if (bio.length < 70) return bio;
+    await ctx.reply("⚠️ Описание должно быть короче 70 символов.");
+  }
+};
+
+const recieveIsFemale = async (ctx: MyContext, conv: MyConversation) => {
+  const keyboard = new Keyboard()
+    .text("Мужской 🙋‍♂️")
+    .text("Женский 🙋‍♀️")
+    .resized();
+  await ctx.reply("Выбери свой пол", { reply_markup: keyboard });
+  while (true) {
+    const gender = await conv.form.text();
+    if (gender === "Мужской 🙋‍♂️" || gender === "Женский 🙋‍♀️")
+      return gender === "Женский 🙋‍♀️";
+    await ctx.reply("Выбери из предложенных!");
+  }
+};
+
+const recievePhotos = async (ctx: MyContext, conv: MyConversation) => {
+  const photos: string[] = [];
+  const keyboard = new Keyboard().resized().text("Оставить текущее").oneTime();
+  const prevPhotos = ctx?.profile?.photos;
+  await ctx.reply("Отправь свое фото 📷", {
+    reply_markup: prevPhotos ? keyboard : { remove_keyboard: true },
+  });
+  while (true) {
+    const photosCtx = await conv.waitFor([":photo", ":text"]);
+    const text = photosCtx?.msg?.text;
+    const photo = photosCtx?.msg?.photo;
+    if (text === "Оставить текущее" && prevPhotos) return prevPhotos;
+    if (photos.length && text === "Это все, сохранить ✅") return photos;
+    if (!photo) {
+      await ctx.reply("Отправь фото!");
+      continue;
+    }
+    photos.push(photo[0].file_id);
+    if (photos.length > 2) return photos;
+    const keyboard = new Keyboard()
+      .text("Это все, сохранить ✅")
+      .oneTime()
+      .resized();
+    if (prevPhotos) keyboard.text("Оставить текущее");
+    await ctx.reply(`✅ Фото добавлено ${photos.length}/3`, {
+      reply_markup: keyboard,
+    });
   }
 };
 
@@ -37,88 +108,19 @@ export const register = async (
   conversation: MyConversation,
   ctx: MyContext
 ) => {
-  let name: string;
-  let age: number;
-  let city: string;
-  let bio: string;
-  let isFemale: boolean;
-  let photos: string[] = [];
-  await ctx.reply("Enter your name", {
-    reply_markup: new Keyboard()
-      .text(ctx.from.first_name ?? "SomeName")
-      .resized(),
+  const userData = {
+    name: await recieveName(ctx, conversation),
+    age: await recieveAge(ctx, conversation),
+    city: await recieveCity(ctx, conversation),
+    bio: await recieveBio(ctx, conversation),
+    isFemale: await recieveIsFemale(ctx, conversation),
+    photos: await recievePhotos(ctx, conversation),
+  };
+  const profile = await prisma.user.upsert({
+    where: { tgId: ctx.from.id },
+    update: userData,
+    create: { tgId: ctx.from.id, ...userData },
   });
-  while (true) {
-    name = await conversation.form.text();
-    if (name.length < 30) break;
-    await ctx.reply("This name is too long!");
-  }
-  await ctx.reply("Enter your age", {
-    reply_markup: { remove_keyboard: true },
-  });
-  while (true) {
-    age = await conversation.form.int();
-    if (age > 15 && age < 100) break;
-    await ctx.reply("Incorrect age!");
-  }
-  await ctx.reply("Enter your city", {
-    reply_markup: new Keyboard().requestLocation("Send my location").resized(),
-  });
-  while (true) {
-    const coordsCtx = await conversation.waitFor([":location", ":text"]);
-    city = await getCity(coordsCtx.msg.location ?? coordsCtx.msg.text);
-    if (city) break;
-    await ctx.reply("Incorrect city!");
-  }
-  await ctx.reply("Write something about you", {
-    reply_markup: { remove_keyboard: true },
-  });
-  while (true) {
-    bio = await conversation.form.text();
-    if (bio.length < 70) break;
-    await ctx.reply("Text is too long");
-  }
-  await ctx.reply("Enter your gender", {
-    reply_markup: new Keyboard().text("Male").text("Female").resized(),
-  });
-  while (true) {
-    const gender = await conversation.form.text();
-    if (gender === "Male" || gender === "Female") {
-      isFemale = gender === "Female";
-      break;
-    }
-    await ctx.reply("Choose one!");
-  }
-  await ctx.reply("Send your photos", {
-    reply_markup: { remove_keyboard: true },
-  });
-  photoLoop: while (true) {
-    const photosCtx = await conversation.waitFor(":photo");
-    photos = [...photos, photosCtx.msg.photo[0].file_id];
-    await ctx.reply("Wanna add one more photo?", {
-      reply_markup: new Keyboard().text("Yes").text("No").oneTime().resized(),
-    });
-    while (true) {
-      const addMore = await conversation.form.text();
-      if (addMore === "No") break photoLoop;
-      if (addMore === "Yes") {
-        await ctx.reply("Send me another photo");
-        continue photoLoop;
-      }
-      await ctx.reply("No such option");
-    }
-  }
-  try {
-    await prisma.user.create({
-      data: { tgId: ctx.from.id, name, age, bio, city, photos, isFemale },
-    });
-  } catch {
-    await prisma.user.update({
-      where: {
-        tgId: ctx.from.id,
-      },
-      data: { name, age, bio, city, photos, isFemale },
-    });
-  }
-  await ctx.reply("Successful registration!");
+  await ctx.reply("👤 Ваш профиль обновлен:");
+  await sendProfile(ctx, profile);
 };
