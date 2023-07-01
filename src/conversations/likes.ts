@@ -6,11 +6,16 @@ import { sendProfile } from "../helpers.js";
 
 type MyConversation = Conversation<MyContext>;
 
-const rateKeyboard = new Keyboard().resized().text("❤️").text("👎");
+const rateKeyboard = new Keyboard()
+  .resized()
+  .text("❤️")
+  .text("👎")
+  .text("⬅️ Закончить просмотр анкет.");
 
 const recieveIsLike = async (ctx: MyContext, conv: MyConversation) => {
   while (true) {
     const reaction = await conv.form.text();
+    if (reaction === "⬅️ Закончить просмотр анкет.") return null;
     if (reaction === "❤️" || reaction === "👎") return reaction === "❤️";
     await ctx.reply("Нет такой опции!");
   }
@@ -34,6 +39,7 @@ export const likes = async (conversation: MyConversation, ctx: MyContext) => {
   for (const profile of profiles) {
     await sendProfile(ctx, profile);
     const isMatch = await recieveIsLike(ctx, conversation);
+    if (isMatch === null) return;
     const grade = await prisma.grade.update({
       where: { fromId_toId: { fromId: profile.tgId, toId: ctx.profile.tgId } },
       data: { isMatch },

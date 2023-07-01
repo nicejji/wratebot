@@ -25,11 +25,17 @@ const findCandidate = async (forUser: User) => {
   });
 };
 
-const rateKeyboard = new Keyboard().resized().text("❤️").text("👎");
+const rateKeyboard = new Keyboard()
+  .resized()
+  .text("❤️")
+  .text("👎")
+  .row()
+  .text("⬅️ Закончить просмотр анкет.");
 
 const recieveIsLike = async (ctx: MyContext, conv: MyConversation) => {
   while (true) {
     const reaction = await conv.form.text();
+    if (reaction === "⬅️ Закончить просмотр анкет.") return null;
     if (reaction === "❤️" || reaction === "👎") return reaction === "❤️";
     await ctx.reply("Нет такой опции!");
   }
@@ -47,6 +53,7 @@ export const search = async (conversation: MyConversation, ctx: MyContext) => {
     }
     await sendProfile(ctx, candidate);
     const isLike = await recieveIsLike(ctx, conversation);
+    if (isLike === null) return;
     const grade = await prisma.grade.create({
       data: { fromId: ctx.from.id, toId: candidate.tgId, isLike },
     });
