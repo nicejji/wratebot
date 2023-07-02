@@ -1,9 +1,9 @@
-import { webhookCallback } from "grammy";
+// import { webhookCallback } from "grammy";
 import bot from "./bot.js";
 import { sendProfile } from "./helpers.js";
-import express from "express";
+// import express from "express";
 
-await bot.api.setMyCommands([
+bot.api.setMyCommands([
   { command: "search", description: "🔎 Поиск пользователей" },
   { command: "likes", description: "❤️ Полученные лайки" },
   { command: "profile", description: "👤 Мой профиль" },
@@ -36,16 +36,19 @@ pm.command("likes", async (ctx) => {
   await ctx.conversation.enter("likes");
 });
 
-const app = express();
-app.use(express.json());
-app.use(`/${process.env.BOT_TOKEN}`, webhookCallback(bot, "express"));
-app.listen(Number(process.env.WEBHOOK_PORT), async () => {
-  console.log(
-    `Bot webhook listening on ${process.env.WEBHOOK_URL}:${process.env.WEBHOOK_PORT}`
-  );
-  await bot.api.setWebhook(
-    `https://${process.env.WEBHOOK_URL}/${process.env.BOT_TOKEN}`
-  );
-  const webHookInfo = await bot.api.getWebhookInfo();
-  console.log(webHookInfo);
-});
+bot.api.deleteWebhook();
+bot.start();
+
+// const app = express();
+// app.use(express.json());
+// app.use(`/${process.env.BOT_TOKEN}`, webhookCallback(bot, "express"));
+// app.listen(Number(process.env.WEBHOOK_PORT), async () => {
+// console.log(
+// `Bot webhook listening on ${process.env.WEBHOOK_URL}:${process.env.WEBHOOK_PORT}`
+// );
+// await bot.api.setWebhook(
+// `https://${process.env.WEBHOOK_URL}/${process.env.BOT_TOKEN}`
+// );
+// const webHookInfo = await bot.api.getWebhookInfo();
+// console.log(webHookInfo);
+// });
