@@ -1,5 +1,7 @@
+import { webhookCallback } from "grammy";
 import bot from "./bot.js";
 import { sendProfile } from "./helpers.js";
+import express from "express";
 
 await bot.api.setMyCommands([
   { command: "search", description: "🔎 Поиск пользователей" },
@@ -34,4 +36,11 @@ pm.command("likes", async (ctx) => {
   await ctx.conversation.enter("likes");
 });
 
-bot.start();
+bot.api.setWebhook(process.env.WEBHOOK_URL);
+
+const app = express();
+app.use(express.json());
+app.use(webhookCallback(bot, "express"));
+app.listen(Number(process.env.WEBHOOK_PORT), () => {
+  console.log(`Bot webhook listening on port ${process.env.WEBHOOk_PORT}`);
+});
