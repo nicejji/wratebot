@@ -14,9 +14,9 @@ const pm = bot.chatType("private");
 
 pm.command("start", async (ctx) => {
   if (ctx.profile) {
-    ctx.reply("Добро пожаловать снова! 😉");
+    await ctx.reply("Добро пожаловать снова! 😉");
   } else {
-    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.reply("Давайте создадим ваш профиль 📝");
     await ctx.conversation.enter("register");
   }
 });
@@ -26,7 +26,7 @@ pm.command("edit", async (ctx) => {
 });
 pm.command("profile", async (ctx) => {
   if (!ctx.profile) {
-    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.reply("Давайте создадим ваш профиль 📝");
     await ctx.conversation.enter("register");
     return;
   }
@@ -35,7 +35,7 @@ pm.command("profile", async (ctx) => {
 });
 pm.command("search", async (ctx) => {
   if (!ctx.profile) {
-    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.reply("Давайте создадим ваш профиль 📝");
     await ctx.conversation.enter("register");
     return;
   }
@@ -44,7 +44,7 @@ pm.command("search", async (ctx) => {
 
 pm.command("likes", async (ctx) => {
   if (!ctx.profile) {
-    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.reply("Давайте создадим ваш профиль 📝");
     await ctx.conversation.enter("register");
     return;
   }
