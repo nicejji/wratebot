@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "export DEBUG=grammy* && tsx watch src/index.ts"
+    "dev": "export DEBUG=grammy* && tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
