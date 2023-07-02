@@ -25,14 +25,17 @@ pm.command("edit", async (ctx) => {
   await ctx.conversation.enter("register");
 });
 pm.command("profile", async (ctx) => {
+  if (!ctx.profile) return;
   await ctx.reply("👤 Так выглядит ваш профиль:");
   await sendProfile(ctx, ctx.profile);
 });
 pm.command("search", async (ctx) => {
+  if (!ctx.profile) return;
   await ctx.conversation.enter("search");
 });
 
 pm.command("likes", async (ctx) => {
+  if (!ctx.profile) return;
   await ctx.conversation.enter("likes");
 });
 
