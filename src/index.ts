@@ -36,7 +36,7 @@ pm.command("likes", async (ctx) => {
   await ctx.conversation.enter("likes");
 });
 
-bot.api.setWebhook(process.env.WEBHOOK_URL);
+await bot.api.setWebhook(process.env.WEBHOOK_URL);
 
 const app = express();
 app.use(express.json());
