@@ -41,6 +41,8 @@ bot.api.setWebhook(process.env.WEBHOOK_URL);
 const app = express();
 app.use(express.json());
 app.use(webhookCallback(bot, "express"));
-app.listen(80, () => {
-  console.log(`Bot webhook listening on ${process.env.WEBHOOK_URL}`);
+app.listen(Number(process.env.WEBHOOK_PORT), () => {
+  console.log(
+    `Bot webhook listening on ${process.env.WEBHOOK_URL}:${process.env.WEBHOOK_PORT}`
+  );
 });
