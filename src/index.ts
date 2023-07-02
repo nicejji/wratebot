@@ -36,12 +36,13 @@ pm.command("likes", async (ctx) => {
   await ctx.conversation.enter("likes");
 });
 
-await bot.api.setWebhook(process.env.WEBHOOK_URL);
-
 const app = express();
 app.use(express.json());
-app.use(webhookCallback(bot, "express"));
-app.listen(Number(process.env.WEBHOOK_PORT), () => {
+app.use(`/${process.env.BOT_TOKEN}`, webhookCallback(bot, "express"));
+app.listen(Number(process.env.WEBHOOK_PORT), async () => {
+  await bot.api.setWebhook(
+    `https://${process.env.WEBHOOK_URL}/${process.env.BOT_TOKEN}`
+  );
   console.log(
     `Bot webhook listening on ${process.env.WEBHOOK_URL}:${process.env.WEBHOOK_PORT}`
   );
