@@ -25,17 +25,26 @@ pm.command("edit", async (ctx) => {
   await ctx.conversation.enter("register");
 });
 pm.command("profile", async (ctx) => {
-  if (!ctx.profile) return;
+  if (!ctx.profile) {
+    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.conversation.enter("register");
+  }
   await ctx.reply("👤 Так выглядит ваш профиль:");
   await sendProfile(ctx, ctx.profile);
 });
 pm.command("search", async (ctx) => {
-  if (!ctx.profile) return;
+  if (!ctx.profile) {
+    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.conversation.enter("register");
+  }
   await ctx.conversation.enter("search");
 });
 
 pm.command("likes", async (ctx) => {
-  if (!ctx.profile) return;
+  if (!ctx.profile) {
+    ctx.reply("Давайте создадим ваш профиль 📝");
+    await ctx.conversation.enter("register");
+  }
   await ctx.conversation.enter("likes");
 });
 
