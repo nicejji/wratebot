@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "export DEBUG=grammy* && tsx watch src/index.ts",
-    "build": "pnpx prisma migrate dev && pnpm exec tsc",
+    "build": "pnpm exec prisma migrate dev && pnpm exec tsc",
     "start": "node dist/index.js"
   },
   "keywords": [],
