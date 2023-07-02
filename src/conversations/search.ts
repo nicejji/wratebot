@@ -53,7 +53,12 @@ export const search = async (conversation: MyConversation, ctx: MyContext) => {
     }
     await sendProfile(ctx, candidate);
     const isLike = await recieveIsLike(ctx, conversation);
-    if (isLike === null) return;
+    if (isLike === null) {
+      await ctx.reply("Вы закончили просмотр анкет ✅", {
+        reply_markup: { remove_keyboard: true },
+      });
+      return;
+    }
     const grade = await prisma.grade.create({
       data: { fromId: ctx.from.id, toId: candidate.tgId, isLike },
     });

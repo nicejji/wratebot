@@ -39,7 +39,12 @@ export const likes = async (conversation: MyConversation, ctx: MyContext) => {
   for (const profile of profiles) {
     await sendProfile(ctx, profile);
     const isMatch = await recieveIsLike(ctx, conversation);
-    if (isMatch === null) return;
+    if (isMatch === null) {
+      await ctx.reply("Вы закончили просмотр анкет ✅", {
+        reply_markup: { remove_keyboard: true },
+      });
+      return;
+    }
     const grade = await prisma.grade.update({
       where: { fromId_toId: { fromId: profile.tgId, toId: ctx.profile.tgId } },
       data: { isMatch },
