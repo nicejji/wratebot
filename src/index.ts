@@ -46,6 +46,6 @@ app.listen(Number(process.env.WEBHOOK_PORT), async () => {
   await bot.api.setWebhook(
     `https://${process.env.WEBHOOK_URL}/${process.env.BOT_TOKEN}`
   );
-  const webHookInfo = bot.api.getWebhookInfo();
+  const webHookInfo = await bot.api.getWebhookInfo();
   console.log(webHookInfo);
 });
