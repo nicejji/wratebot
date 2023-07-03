@@ -1,4 +1,5 @@
 import { Bot } from "grammy";
+import { commandsMiddleware } from "../middleware/commands.js";
 import { Context } from "../types.js";
 import edit from "./commands/edit.js";
 import likes from "./commands/likes.js";
@@ -14,11 +15,11 @@ const registerHandlers = async (bot: Bot<Context>) => {
     { command: "edit", description: "✏️ Редактировать профиль" },
   ]);
   const pm = bot.chatType("private");
-  pm.command("start", start);
-  pm.command("profile", profile);
-  pm.command("edit", edit);
-  pm.command("search", search);
-  pm.command("likes", likes);
+  pm.command("start", commandsMiddleware, start);
+  pm.command("profile", commandsMiddleware, profile);
+  pm.command("edit", commandsMiddleware, edit);
+  pm.command("search", commandsMiddleware, search);
+  pm.command("likes", commandsMiddleware, likes);
 };
 
 export default registerHandlers;
