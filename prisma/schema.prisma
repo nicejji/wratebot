@@ -15,7 +15,7 @@ model Session {
 }
 
 model User {
-  tgId           BigInt   @id
+  tgId           Int      @id
   username       String
   name           String
   age            Int
@@ -29,8 +29,8 @@ model User {
 }
 
 model Grade {
-  fromId  BigInt
-  toId    BigInt
+  fromId  Int
+  toId    Int
   isLike  Boolean
   isMatch Boolean?
   created DateTime @default(now())

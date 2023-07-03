@@ -61,9 +61,9 @@ export const likes = async (conversation: Conversation, ctx: Context) => {
           parse_mode: "MarkdownV2",
         }
       );
-      await sendProfile(ctx, ctx.profile, Number(profile.tgId));
+      await sendProfile(ctx, ctx.profile, profile.tgId);
       await ctx.api.sendMessage(
-        Number(profile.tgId),
+        profile.tgId,
         `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
           ctx.profile.name
         )}](https://t.me/${ctx.profile.username})`,

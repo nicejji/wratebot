@@ -60,8 +60,7 @@ export const search = async (conversation: Conversation, ctx: Context) => {
       data: { fromId: ctx.from.id, toId: candidate.tgId, isLike },
     });
     if (grade.isLike) {
-      const toId = Number(candidate.tgId);
-      await ctx.api.sendMessage(toId, "❤️ Вы получили новый лайк!");
+      await ctx.api.sendMessage(candidate.tgId, "❤️ Вы получили новый лайк!");
     }
   }
 };
