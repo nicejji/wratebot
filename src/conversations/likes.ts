@@ -1,5 +1,6 @@
+import { User } from "@prisma/client";
 import { Keyboard } from "grammy";
-import { sendProfile } from "../helpers.js";
+import { escapeMarkdown, sendProfile } from "../helpers.js";
 import prisma from "../prisma.js";
 import { Context, Conversation } from "../types.js";
 
@@ -18,14 +19,19 @@ const recieveIsLike = async (ctx: Context, conv: Conversation) => {
   }
 };
 
+const getLikers = async (user: User) => {
+  return (
+    await prisma.user.findUnique({
+      where: { tgId: user.tgId },
+      include: { recievedGrades: { include: { from: true } } },
+    })
+  ).recievedGrades
+    .filter((grade) => grade.isLike && !grade.isMatch)
+    .map((grade) => grade.from);
+};
+
 export const likes = async (conversation: Conversation, ctx: Context) => {
-  const extendedUser = await prisma.user.findUnique({
-    where: { tgId: ctx.profile.tgId },
-    include: { recievedGrades: { include: { from: true } } },
-  });
-  const profiles = extendedUser.recievedGrades
-    .filter((g) => g.isLike && !g.isMatch)
-    .map((g) => g.from);
+  const profiles = await getLikers(ctx.profile);
   if (!profiles.length) {
     await ctx.reply("⚠️ Все лайки просмотрены!");
     return;
@@ -48,7 +54,9 @@ export const likes = async (conversation: Conversation, ctx: Context) => {
     });
     if (grade.isMatch) {
       await ctx.reply(
-        `Отлично, переходите общаться 👉 [${profile.name}](https://t.me/${profile.username})`,
+        `Отлично, переходите общаться 👉 [${escapeMarkdown(
+          profile.name
+        )}](https://t.me/${profile.username})`,
         {
           parse_mode: "MarkdownV2",
         }
@@ -56,7 +64,9 @@ export const likes = async (conversation: Conversation, ctx: Context) => {
       await sendProfile(ctx, ctx.profile, Number(profile.tgId));
       await ctx.api.sendMessage(
         Number(profile.tgId),
-        `Есть взаимная симпатия, переходите общаться 👉 [${ctx.profile.name}](https://t.me/${ctx.profile.username})`,
+        `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
+          ctx.profile.name
+        )}](https://t.me/${ctx.profile.username})`,
         { parse_mode: "MarkdownV2" }
       );
     }

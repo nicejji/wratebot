@@ -1,6 +1,10 @@
 import { User } from "@prisma/client";
 import { Context } from "./types.js";
 
+export const escapeMarkdown = (text: string) => {
+  return [...text].map((s) => `\\${s}`).join("");
+};
+
 export const sendProfile = async (
   ctx: Context,
   profile: User,
