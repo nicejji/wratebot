@@ -1,7 +1,7 @@
 lockfileVersion: "6.0"
 
 settings:
-  autoInstallPeers: false
+  autoInstallPeers: true
   excludeLinksFromLockfile: false
 
 dependencies:
@@ -66,7 +66,7 @@ packages:
       }
     dependencies:
       "@esbuild-kit/core-utils": 3.1.0
-      get-tsconfig: 4.6.0
+      get-tsconfig: 4.6.2
     dev: true
 
   /@esbuild-kit/core-utils@3.1.0:
@@ -86,7 +86,7 @@ packages:
       }
     dependencies:
       "@esbuild-kit/core-utils": 3.1.0
-      get-tsconfig: 4.6.0
+      get-tsconfig: 4.6.2
     dev: true
 
   /@esbuild/android-arm64@0.17.19:
@@ -362,7 +362,7 @@ packages:
     peerDependencies:
       grammy: ^1.10.0
     dependencies:
-      "@grammyjs/types": 3.1.1
+      "@grammyjs/types": 3.1.2
       debug: 4.3.4
       grammy: 1.16.2
       o-son: 1.0.1
@@ -393,6 +393,13 @@ packages:
     resolution:
       {
         integrity: sha512-nTNYvk+Al/nXZAMTEzPYEyW6pfgYgNuf/gxfx17kCxjHpAYhV+pcmROuD9eOBDLaBDh/hZJkQTIY6S3CfTAC0Q==,
+      }
+    dev: false
+
+  /@grammyjs/types@3.1.2:
+    resolution:
+      {
+        integrity: sha512-AsSkTUfZCfSEIacUBOQ94qLbZZy3UofkschWv4uBJKEHjuEfGnjeZZgiwhDfTDjmpmW+MbcasvS+FEfD2jiSLw==,
       }
     dev: false
 
@@ -773,10 +780,10 @@ packages:
       has-symbols: 1.0.3
     dev: false
 
-  /get-tsconfig@4.6.0:
+  /get-tsconfig@4.6.2:
     resolution:
       {
-        integrity: sha512-lgbo68hHTQnFddybKbbs/RDRJnJT5YyGy2kQzVwbq+g67X73i+5MVTval34QxGkOe9X5Ujf1UYpCaphLyltjEg==,
+        integrity: sha512-E5XrT4CbbXcXWy+1jChlZmrmCwd5KGx502kDCXJJ7y898TtWW9FwoG5HfOLVRKmlmDGkWN2HM9Ho+/Y8F0sJDg==,
       }
     dependencies:
       resolve-pkg-maps: 1.0.0
@@ -792,7 +799,7 @@ packages:
       "@grammyjs/types": 3.1.1
       abort-controller: 3.0.0
       debug: 4.3.4
-      node-fetch: 2.6.11
+      node-fetch: 2.6.12
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -949,10 +956,10 @@ packages:
     engines: { node: ">= 0.6" }
     dev: false
 
-  /node-fetch@2.6.11:
+  /node-fetch@2.6.12:
     resolution:
       {
-        integrity: sha512-4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w==,
+        integrity: sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==,
       }
     engines: { node: 4.x || >=6.0.0 }
     peerDependencies:

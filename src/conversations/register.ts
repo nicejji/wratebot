@@ -1,12 +1,9 @@
-import { Conversation } from "@grammyjs/conversations";
-import { MyContext } from "../context.js";
 import { Keyboard } from "grammy";
-import prisma from "../prisma.js";
 import { sendProfile } from "../helpers.js";
+import prisma from "../prisma.js";
+import { Context, Conversation } from "../types.js";
 
-type MyConversation = Conversation<MyContext>;
-
-const recieveName = async (ctx: MyContext, conv: MyConversation) => {
+const recieveName = async (ctx: Context, conv: Conversation) => {
   const keyboard = new Keyboard().resized();
   const prevName = ctx?.profile?.name;
   const tgName = ctx?.from?.first_name;
@@ -22,7 +19,7 @@ const recieveName = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recieveAge = async (ctx: MyContext, conv: MyConversation) => {
+const recieveAge = async (ctx: Context, conv: Conversation) => {
   const prevAge = ctx?.profile?.age;
   await ctx.reply("Введите ваш возраст 🔢", {
     reply_markup: prevAge
@@ -36,7 +33,7 @@ const recieveAge = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recieveCity = async (ctx: MyContext, conv: MyConversation) => {
+const recieveCity = async (ctx: Context, conv: Conversation) => {
   const keyboard = new Keyboard().text("Полоцк").text("Новополоцк").resized();
   await ctx.reply("Выберите свой город 🏙️", { reply_markup: keyboard });
   while (true) {
@@ -46,7 +43,7 @@ const recieveCity = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recieveBio = async (ctx: MyContext, conv: MyConversation) => {
+const recieveBio = async (ctx: Context, conv: Conversation) => {
   const keyboard = new Keyboard().text("Оставить текущее").resized();
   const prevBio = ctx?.profile?.bio;
   await ctx.reply("Расскажи что-нибудь о себе 📝", {
@@ -60,7 +57,7 @@ const recieveBio = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recieveIsFemale = async (ctx: MyContext, conv: MyConversation) => {
+const recieveIsFemale = async (ctx: Context, conv: Conversation) => {
   const keyboard = new Keyboard()
     .text("Мужской 🙋‍♂️")
     .text("Женский 🙋‍♀️")
@@ -74,7 +71,7 @@ const recieveIsFemale = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-const recievePhotos = async (ctx: MyContext, conv: MyConversation) => {
+const recievePhotos = async (ctx: Context, conv: Conversation) => {
   const photos: string[] = [];
   const keyboard = new Keyboard().resized().text("Оставить текущее").oneTime();
   const prevPhotos = ctx?.profile?.photos;
@@ -104,10 +101,7 @@ const recievePhotos = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-export const register = async (
-  conversation: MyConversation,
-  ctx: MyContext
-) => {
+export const register = async (conversation: Conversation, ctx: Context) => {
   const userData = {
     name: await recieveName(ctx, conversation),
     username: ctx?.from?.username ?? "",

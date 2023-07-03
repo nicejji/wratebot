@@ -1,11 +1,8 @@
-import { Conversation } from "@grammyjs/conversations";
-import { MyContext } from "../context.js";
 import { User } from "@prisma/client";
-import prisma from "../prisma.js";
-import { sendProfile } from "../helpers.js";
 import { Keyboard } from "grammy";
-
-type MyConversation = Conversation<MyContext>;
+import { sendProfile } from "../helpers.js";
+import prisma from "../prisma.js";
+import { Context, Conversation } from "../types.js";
 
 const findCandidate = async (forUser: User) => {
   const extendedUser = await prisma.user.findUnique({
@@ -32,7 +29,7 @@ const rateKeyboard = new Keyboard()
   .row()
   .text("⬅️ Закончить просмотр анкет.");
 
-const recieveIsLike = async (ctx: MyContext, conv: MyConversation) => {
+const recieveIsLike = async (ctx: Context, conv: Conversation) => {
   while (true) {
     const reaction = await conv.form.text();
     if (reaction === "⬅️ Закончить просмотр анкет.") return null;
@@ -41,7 +38,7 @@ const recieveIsLike = async (ctx: MyContext, conv: MyConversation) => {
   }
 };
 
-export const search = async (conversation: MyConversation, ctx: MyContext) => {
+export const search = async (conversation: Conversation, ctx: Context) => {
   await ctx.reply("🔎 Поиск пользователей ...", { reply_markup: rateKeyboard });
   while (true) {
     const candidate = await findCandidate(ctx.profile);

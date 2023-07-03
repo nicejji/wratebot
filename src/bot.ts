@@ -1,16 +1,15 @@
-import dotenv from "dotenv";
-import { Bot, session } from "grammy";
-import { MyContext } from "./context.js";
-import { PrismaAdapter } from "@grammyjs/storage-prisma";
 import { conversations, createConversation } from "@grammyjs/conversations";
-import { register } from "./conversations/register.js";
-import prisma from "./prisma.js";
-import { profileMiddleware } from "./middleware/profile.js";
-import { search } from "./conversations/search.js";
+import { PrismaAdapter } from "@grammyjs/storage-prisma";
+import { Bot, session } from "grammy";
 import { likes } from "./conversations/likes.js";
+import { register } from "./conversations/register.js";
+import { search } from "./conversations/search.js";
+import registerHandlers from "./handlers/registerHandlers.js";
+import { profileMiddleware } from "./middleware/profile.js";
+import prisma from "./prisma.js";
+import { Context } from "./types.js";
 
-dotenv.config();
-const bot = new Bot<MyContext>(process.env.BOT_TOKEN);
+const bot = new Bot<Context>(process.env.BOT_TOKEN);
 bot.use(
   session({ initial: () => ({}), storage: new PrismaAdapter(prisma.session) })
 );
@@ -19,5 +18,6 @@ bot.use(conversations());
 bot.use(createConversation(register));
 bot.use(createConversation(search));
 bot.use(createConversation(likes));
+registerHandlers(bot);
 
 export default bot;

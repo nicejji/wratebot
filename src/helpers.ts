@@ -1,8 +1,8 @@
 import { User } from "@prisma/client";
-import { MyContext } from "./context.js";
+import { Context } from "./types.js";
 
 export const sendProfile = async (
-  ctx: MyContext,
+  ctx: Context,
   profile: User,
   toId?: number
 ) => {
