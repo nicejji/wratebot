@@ -4,7 +4,7 @@
 
 #### How to run
 
-- Fill .env file in project root with following environment variables:
+- Fill `.env` file in project root with following environment variables:
 
 ```
 DATABASE_URL=<POSTRESQL_DATABASE_URL>
