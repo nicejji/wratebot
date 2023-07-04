@@ -14,5 +14,6 @@ PORT=<PORT_FOR_WEBHOOK>
 
 ```
 
-- Build project `pnpm build`
-- Run bot `pnpm start`
+- Install dependencies `pnpm i` or `npm i`
+- Build project `pnpm build` or `npm run build`
+- Run bot `pnpm start` or `npm run start`
