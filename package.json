@@ -1,17 +1,9 @@
 {
-  "name": "rate_bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "pnpm exec tsx watch src/index.ts",
     "build": "pnpm exec prisma migrate dev && pnpm exec tsc",
     "start": "node dist/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "devDependencies": {
     "@grammyjs/storage-prisma": "^2.3.0",
     "@types/express": "^4.17.17",
@@ -27,5 +19,6 @@
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "grammy": "^1.16.2"
-  }
+  },
+  "type": "module"
 }
