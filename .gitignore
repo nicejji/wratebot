@@ -1,3 +1,5 @@
+# Gitignore for the following technologies: Node
+
 # Logs
 logs
 *.log
@@ -102,7 +104,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -129,8 +130,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# mac OS
-.DS_Store
+# Serverless Webpack directories
+.webpack/
 
-# sqlite
-*.db
+# SvelteKit build / generate output
+.svelte-kit
+
