@@ -5,17 +5,17 @@ import prisma from "../prisma.js";
 import { Context, Conversation } from "../types.js";
 
 const findCandidate = async (forUser: User) => {
-  const extendedUser = await prisma.user.findUnique({
+  const { sentGrades, recievedGrades } = await prisma.user.findUnique({
     where: { tgId: forUser.tgId },
     include: { sentGrades: true, recievedGrades: true },
   });
-  const excludeIds = [
-    ...extendedUser.sentGrades.map((g) => g.toId),
-    ...extendedUser.recievedGrades.map((g) => g.fromId),
+  const excludedIds = [
     forUser.tgId,
+    ...sentGrades.map((g) => g.toId),
+    ...recievedGrades.map((g) => g.fromId),
   ];
   return await prisma.user.findFirst({
-    where: { tgId: { notIn: excludeIds }, isFemale: !forUser.isFemale },
+    where: { tgId: { notIn: excludedIds }, isFemale: !forUser.isFemale },
     orderBy: {
       _relevance: { fields: ["city"], search: forUser.city, sort: "asc" },
     },
@@ -59,8 +59,7 @@ export const search = async (conversation: Conversation, ctx: Context) => {
     const grade = await prisma.grade.create({
       data: { fromId: ctx.from.id, toId: candidate.tgId, isLike },
     });
-    if (grade.isLike) {
+    if (grade.isLike)
       await ctx.api.sendMessage(candidate.tgId, "❤️ Вы получили новый лайк!");
-    }
   }
 };

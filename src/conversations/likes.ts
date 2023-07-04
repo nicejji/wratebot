@@ -30,6 +30,25 @@ const getLikers = async (user: User) => {
     .map((grade) => grade.from);
 };
 
+const handleMatch = async (ctx: Context, from: User) => {
+  await ctx.reply(
+    `Отлично, переходите общаться 👉 [${escapeMarkdown(
+      from.name
+    )}](https://t.me/${from.username})`,
+    {
+      parse_mode: "MarkdownV2",
+    }
+  );
+  await sendProfile(ctx, ctx.profile, from.tgId);
+  await ctx.api.sendMessage(
+    from.tgId,
+    `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
+      ctx.profile.name
+    )}](https://t.me/${ctx.profile.username})`,
+    { parse_mode: "MarkdownV2" }
+  );
+};
+
 export const likes = async (conversation: Conversation, ctx: Context) => {
   const profiles = await getLikers(ctx.profile);
   if (!profiles.length) {
@@ -52,24 +71,7 @@ export const likes = async (conversation: Conversation, ctx: Context) => {
       where: { fromId_toId: { fromId: profile.tgId, toId: ctx.profile.tgId } },
       data: { isMatch },
     });
-    if (grade.isMatch) {
-      await ctx.reply(
-        `Отлично, переходите общаться 👉 [${escapeMarkdown(
-          profile.name
-        )}](https://t.me/${profile.username})`,
-        {
-          parse_mode: "MarkdownV2",
-        }
-      );
-      await sendProfile(ctx, ctx.profile, profile.tgId);
-      await ctx.api.sendMessage(
-        profile.tgId,
-        `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
-          ctx.profile.name
-        )}](https://t.me/${ctx.profile.username})`,
-        { parse_mode: "MarkdownV2" }
-      );
-    }
+    if (grade.isMatch) await handleMatch(ctx, profile);
   }
   await ctx.reply("✅ Все лайки просмотрены!", {
     reply_markup: { remove_keyboard: true },
