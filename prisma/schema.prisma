@@ -9,13 +9,13 @@ datasource db {
 }
 
 model Session {
-  id    Int    @id @default(autoincrement())
+  id    BigInt @id @default(autoincrement())
   key   String @unique
   value String
 }
 
 model User {
-  tgId           Int      @id
+  tgId           BigInt   @id
   username       String
   name           String
   age            Int
@@ -29,8 +29,8 @@ model User {
 }
 
 model Grade {
-  fromId  Int
-  toId    Int
+  fromId  BigInt
+  toId    BigInt
   isLike  Boolean
   isMatch Boolean?
   created DateTime @default(now())

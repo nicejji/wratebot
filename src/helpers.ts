@@ -10,9 +10,10 @@ export const sendProfile = async (
   profile: User,
   toId?: number
 ) => {
+  if (!ctx?.from?.id) return;
   const text = `${profile.name}, ${profile.age} - ${profile.city}\n${profile.bio}`;
   await ctx.api.sendMediaGroup(
-    toId ?? ctx.from.id,
+    toId ?? ctx?.from?.id,
     profile.photos.map((id, i) => ({
       media: id,
       type: "photo",

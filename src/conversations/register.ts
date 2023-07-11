@@ -102,6 +102,7 @@ const recievePhotos = async (ctx: Context, conv: Conversation) => {
 };
 
 export const register = async (conversation: Conversation, ctx: Context) => {
+  if (!ctx?.from?.id) return;
   const userData = {
     name: await recieveName(ctx, conversation),
     username: ctx?.from?.username ?? "",

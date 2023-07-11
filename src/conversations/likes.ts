@@ -19,18 +19,18 @@ const recieveIsLike = async (ctx: Context, conv: Conversation) => {
   }
 };
 
-const getLikers = async (user: User) => {
-  return (
+const getLikers = async (user: User) =>
+  (
     await prisma.user.findUnique({
       where: { tgId: user.tgId },
       include: { recievedGrades: { include: { from: true } } },
     })
-  ).recievedGrades
+  )?.recievedGrades
     .filter((grade) => grade.isLike && !grade.isMatch)
-    .map((grade) => grade.from);
-};
+    .map((grade) => grade.from) ?? [];
 
 const handleMatch = async (ctx: Context, from: User) => {
+  if (!ctx.profile) return;
   await ctx.reply(
     `Отлично, переходите общаться 👉 [${escapeMarkdown(
       from.name
@@ -39,9 +39,9 @@ const handleMatch = async (ctx: Context, from: User) => {
       parse_mode: "MarkdownV2",
     }
   );
-  await sendProfile(ctx, ctx.profile, from.tgId);
+  await sendProfile(ctx, ctx.profile, Number(from.tgId));
   await ctx.api.sendMessage(
-    from.tgId,
+    Number(from.tgId),
     `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
       ctx.profile.name
     )}](https://t.me/${ctx.profile.username})`,
@@ -50,6 +50,7 @@ const handleMatch = async (ctx: Context, from: User) => {
 };
 
 export const likes = async (conversation: Conversation, ctx: Context) => {
+  if (!ctx.profile) return;
   const profiles = await getLikers(ctx.profile);
   if (!profiles.length) {
     await ctx.reply("⚠️ Все лайки просмотрены!");

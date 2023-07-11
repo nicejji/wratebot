@@ -1,24 +1,26 @@
 {
+  "type": "module",
   "scripts": {
-    "dev": "pnpm exec tsx watch src/index.ts",
+    "dev": "pnpm exec tsx watch src/",
     "build": "pnpm exec prisma migrate dev && pnpm exec tsc",
     "start": "node dist/index.js"
   },
   "devDependencies": {
-    "@grammyjs/storage-prisma": "^2.3.0",
     "@types/express": "^4.17.17",
     "@types/node": "^20.3.1",
-    "prisma": "^4.15.0",
+    "prisma": "^4.16.2",
     "tsx": "^3.12.7",
     "typescript": "^5.1.3"
   },
   "dependencies": {
     "@grammyjs/conversations": "^1.1.2",
     "@grammyjs/files": "^1.0.4",
-    "@prisma/client": "4.15.0",
+    "@grammyjs/menu": "^1.2.1",
+    "@grammyjs/storage-prisma": "^2.3.0",
+    "@prisma/client": "4.16.2",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
-    "grammy": "^1.16.2"
-  },
-  "type": "module"
+    "grammy": "^1.16.2",
+    "zod": "^3.21.4"
+  }
 }

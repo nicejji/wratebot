@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Session" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "key" TEXT NOT NULL,
     "value" TEXT NOT NULL,
 

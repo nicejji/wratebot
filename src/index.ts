@@ -1,14 +1,14 @@
-(await import("dotenv")).config();
 import express from "express";
 import { webhookCallback } from "grammy";
 import bot from "./bot.js";
+import env from "./env.js";
 
-const secretPath = process.env.BOT_TOKEN;
+const secretPath = env.BOT_TOKEN;
 
 const app = express();
 app.use(express.json());
 app.use(`/${secretPath}`, webhookCallback(bot, "express"));
 
-app.listen(Number(process.env.PORT), async () => {
-  await bot.api.setWebhook(`https://${process.env.DOMAIN}/${secretPath}`);
+app.listen(env.PORT, async () => {
+  await bot.api.setWebhook(`${env.DOMAIN}/${secretPath}`);
 });

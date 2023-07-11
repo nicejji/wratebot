@@ -5,10 +5,11 @@ import prisma from "../prisma.js";
 import { Context, Conversation } from "../types.js";
 
 const findCandidate = async (forUser: User) => {
-  const { sentGrades, recievedGrades } = await prisma.user.findUnique({
-    where: { tgId: forUser.tgId },
-    include: { sentGrades: true, recievedGrades: true },
-  });
+  const { sentGrades = [], recievedGrades = [] } =
+    (await prisma.user.findUnique({
+      where: { tgId: forUser.tgId },
+      include: { sentGrades: true, recievedGrades: true },
+    })) ?? {};
   const excludedIds = [
     forUser.tgId,
     ...sentGrades.map((g) => g.toId),
@@ -39,6 +40,7 @@ const recieveIsLike = async (ctx: Context, conv: Conversation) => {
 };
 
 export const search = async (conversation: Conversation, ctx: Context) => {
+  if (!ctx.profile || !ctx?.from?.id) return;
   await ctx.reply("🔎 Поиск пользователей ...", { reply_markup: rateKeyboard });
   while (true) {
     const candidate = await findCandidate(ctx.profile);
@@ -60,6 +62,9 @@ export const search = async (conversation: Conversation, ctx: Context) => {
       data: { fromId: ctx.from.id, toId: candidate.tgId, isLike },
     });
     if (grade.isLike)
-      await ctx.api.sendMessage(candidate.tgId, "❤️ Вы получили новый лайк!");
+      await ctx.api.sendMessage(
+        Number(candidate.tgId),
+        "❤️ Вы получили новый лайк!"
+      );
   }
 };
