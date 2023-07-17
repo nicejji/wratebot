@@ -12,7 +12,7 @@ import { Context } from "./types.js";
 
 const bot = new Bot<Context>(env.BOT_TOKEN);
 bot.use(
-  session({ initial: () => ({}), storage: new PrismaAdapter(prisma.session) })
+  session({ initial: () => ({}), storage: new PrismaAdapter(prisma.session) }),
 );
 bot.use(profileMiddleware);
 bot.use(conversations());

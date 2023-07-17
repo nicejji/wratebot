@@ -36,11 +36,8 @@ const recieveAge = async (ctx: Context, conv: Conversation) => {
 const recieveCity = async (ctx: Context, conv: Conversation) => {
   const keyboard = new Keyboard().text("Полоцк").text("Новополоцк").resized();
   await ctx.reply("Выберите свой город 🏙️", { reply_markup: keyboard });
-  while (true) {
-    const city = await conv.form.text();
-    if (city === "Полоцк" || city === "Новополоцк") return city;
-    await ctx.reply("⚠️ Выбери город из предложенных!");
-  }
+  const city = await conv.form.select(["Полоцк", "Новополоцк"]);
+  return city;
 };
 
 const recieveBio = async (ctx: Context, conv: Conversation) => {
@@ -63,12 +60,8 @@ const recieveIsFemale = async (ctx: Context, conv: Conversation) => {
     .text("Женский 🙋‍♀️")
     .resized();
   await ctx.reply("Выбери свой пол", { reply_markup: keyboard });
-  while (true) {
-    const gender = await conv.form.text();
-    if (gender === "Мужской 🙋‍♂️" || gender === "Женский 🙋‍♀️")
-      return gender === "Женский 🙋‍♀️";
-    await ctx.reply("Выбери из предложенных!");
-  }
+  const gender = await conv.form.select(["Мужской 🙋‍♂️", "Женский 🙋‍♀️"]);
+  return gender === "Женский 🙋‍♀️";
 };
 
 const recievePhotos = async (ctx: Context, conv: Conversation) => {

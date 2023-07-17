@@ -33,19 +33,19 @@ const handleMatch = async (ctx: Context, from: User) => {
   if (!ctx.profile) return;
   await ctx.reply(
     `Отлично, переходите общаться 👉 [${escapeMarkdown(
-      from.name
+      from.name,
     )}](https://t.me/${from.username})`,
     {
       parse_mode: "MarkdownV2",
-    }
+    },
   );
   await sendProfile(ctx, ctx.profile, Number(from.tgId));
   await ctx.api.sendMessage(
     Number(from.tgId),
     `Есть взаимная симпатия, переходите общаться 👉 [${escapeMarkdown(
-      ctx.profile.name
+      ctx.profile.name,
     )}](https://t.me/${ctx.profile.username})`,
-    { parse_mode: "MarkdownV2" }
+    { parse_mode: "MarkdownV2" },
   );
 };
 

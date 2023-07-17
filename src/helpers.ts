@@ -8,7 +8,7 @@ export const escapeMarkdown = (text: string) => {
 export const sendProfile = async (
   ctx: Context,
   profile: User,
-  toId?: number
+  toId?: number,
 ) => {
   if (!ctx?.from?.id) return;
   const text = `${profile.name}, ${profile.age} - ${profile.city}\n${profile.bio}`;
@@ -18,6 +18,6 @@ export const sendProfile = async (
       media: id,
       type: "photo",
       caption: i === 0 ? text : "",
-    }))
+    })),
   );
 };

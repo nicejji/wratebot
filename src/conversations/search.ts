@@ -64,7 +64,7 @@ export const search = async (conversation: Conversation, ctx: Context) => {
     if (grade.isLike)
       await ctx.api.sendMessage(
         Number(candidate.tgId),
-        "❤️ Вы получили новый лайк!"
+        "❤️ Вы получили новый лайк!",
       );
   }
 };
